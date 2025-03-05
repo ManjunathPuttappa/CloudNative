@@ -1,15 +1,19 @@
-from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from main import app
  
-app = FastAPI()
+client = TestClient(app)
  
-@app.get("/")
-def read_root():
-    return {"message": "Hello, World!"}
+def test_read_root():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello, World!"}
  
-@app.get("/users/{user_id}")
-def read_user(user_id: int):
-    return {"user_id": user_id, "name": f"User {user_id}"}
+def test_read_user():
+    response = client.get("/users/1")
+    assert response.status_code == 200
+    assert response.json() == {"user_id": 1, "name": "User 1"}
  
-@app.post("/users/")
-def create_user(user: dict):
-    return {"message": "User created", "user": user}
+def test_create_user():
+    response = client.post("/users/", json={"name": "John"})
+    assert response.status_code == 200
+    assert response.json()["message"] == "User created"
